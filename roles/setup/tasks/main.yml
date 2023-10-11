@@ -94,8 +94,15 @@
     group: "{{ vm_user }}"
 
 # Enable vscode-server SystemD service
-- name: Ensure SystemD service for vscode-server is enabled and started.
+- name: Ensure SystemD service for vscode-server is enabled.
   ansible.builtin.shell: >
-    "systemctl enable --now code-server@{{ vm_user }}.service"
+    "systemctl enable code-server@{{ vm_user }}.service"
   when: "code_server_service_stat.changed == true"
+
+# Start vscode-server SystemD service
+- name: Ensure SystemD service for vscode-server is started.
+  ansible.builtin.shell: >
+    "systemctl start code-server@{{ vm_user }}.service"
+  when: "code_server_service_stat.changed == true"
+
 
