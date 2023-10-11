@@ -1,5 +1,5 @@
 # install neccessary packages
-- name: Enusre neccessary packages are installed.
+- name: Ensure neccessary packages are installed.
   ansible.builtin.apt:
     pkg:
     - openjdk-11-jdk-headless
@@ -7,23 +7,10 @@
     - npm
     state: present
 
-# check if vscode-server is installed
-- name: Check if VS Code Server is installed.
-  stat:
-    path: "{{ ansible_env.HOME }}/.config/vscode-server/config.yaml"
-  register: vs_code_server_stat
-
 # install vscode-server if not already done
 - name: Ensure VS Code Server is installed.
   ansible.builtin.shell: >
     curl -fsSL https://code-server.dev/install.sh | sh
-  when: not vs_code_server_stat
-
-# check if nvm is installed
-- name: Check if NVM is installed.
-  stat:
-    path: "/home/{{ vm_user }}/.nvm/nvm.sh"
-  register: nvm_stat
 
 # install node version manager  if not already done
 - name: Ensure NVM is installed.
@@ -31,13 +18,6 @@
     curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.5/install.sh | bash
   args:
     creates: "/home/{{ vm_user }}/.nvm/nvm.sh"
-  when: not nvm_stat
-
-# check if repo is cloned
-- name: Check if the ProfitEngineers repository is cloned.
-  stat:
-    path: "/home/{{ vm_user }}/profitengineers/.git/config"
-  register: repo_stat
 
 # clone gitlab repo if not already
 - name: Ensure ProfitEngineers GitLab repository is cloned.
@@ -46,7 +26,6 @@
     dest: "/home/{{ vm_user }}/profitengineers"
     version: main
     accept_hostkey: yes
-  when: not repo_stat
 
 # Set email address in git config
 - name: Ensure E-Mail git config entry is set.
@@ -77,13 +56,6 @@
     global: no
     path: "/home/{{ vm_user }}/profitengineers"
 
-# Check if vscode-server systemd service is enabled
-- name: Check if VS Code Server SystemD service is enabled.
-  ansible.builtin.service:
-    name: "code-server@{{ vm_user }}.service"
-    state: started
-  register: code_server_service_stat
-
 # Change ownership of files
 - name: Recursively change ownership of files.
   ansible.builtin.file:
@@ -95,14 +67,13 @@
 
 # Enable vscode-server SystemD service
 - name: Ensure SystemD service for vscode-server is enabled.
-  ansible.builtin.shell: >
-    "systemctl enable code-server@{{ vm_user }}.service"
-  when: "code_server_service_stat.changed == true"
+  ansible.builtin.service:
+    name: "code-server@{{ vm_user }}.service"
+    enabled: yes
 
 # Start vscode-server SystemD service
 - name: Ensure SystemD service for vscode-server is started.
-  ansible.builtin.shell: >
-    "systemctl start code-server@{{ vm_user }}.service"
-  when: "code_server_service_stat.changed == true"
-
+  ansible.builtin.service:
+    name: "code-server@{{ vm_user }}.service"
+    state: started
 
