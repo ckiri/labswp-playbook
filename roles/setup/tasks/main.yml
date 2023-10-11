@@ -33,13 +33,36 @@
     creates: "/home/{{ vm_user }}/.nvm/nvm.sh"
   when: not nvm_stat
 
-# clone gitlab repo
+# check if repo is cloned
+- name: Check if the ProfitEngineers repository is cloned.
+  stat:
+    path: "/home/{{ vm_user }}/profitengineers/.git/config"
+  register: repo_stat
+
+# clone gitlab repo if not already
 - name: Ensure ProfitEngineers GitLab repository is cloned.
   ansible.builtin.git:
     repo: "https://{{ gitlab_user }}:{{ gitlab_token }}@git.it.hs-heilbronn.de/it/courses/seb/pmt/pmt-sose-23/profitengineers.git"
     dest: "/home/{{ vm_user }}/profitengineers"
     version: main
     accept_hostkey: yes
+  when: not repo_stat
+
+# Set email address in git config
+- name: Ensure E-Mail git config entry is set.
+  community.general.git_config:
+    name: user.email
+    repo: '/home/{{ vm_user }}/profitengineers'
+    scope: local
+    value: '{{ gitlab_user }}@stud.hs-heilbronn.de'
+
+# Set full name in git config
+- name: Ensure Name git config entry is set.
+  community.general.git_config:
+    name: user.name
+    repo: '/home/{{ vm_user }}/profitengineers'
+    scope: local
+    value: '{{ forename }} {{ surname }}'
 
 # Install typescript via npm
 - name: Ensure Typescript NPM package is installed.
@@ -60,6 +83,15 @@
     name: "code-server@{{ vm_user }}.service"
     state: started
   register: code_server_service_stat
+
+# Change ownership of files
+- name: Recursively change ownership of files.
+  ansible.builtin.file:
+    path: "/home/{{ vm_user }}"
+    state: directory
+    recurse: yes
+    owner: "{{ vm_user }}"
+    group: "{{ vm_user }}"
 
 # Enable vscode-server SystemD service
 - name: Ensure SystemD service for vscode-server is enabled and started.

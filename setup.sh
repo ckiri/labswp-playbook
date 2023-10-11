@@ -8,7 +8,9 @@
 #   vm_user: username of the vm's non root user.
 #######################################
 prompt_user() {
-  read -p "Enter the username of your VM user (not root): " vm_user
+  read -p "Enter your forname e.g. \"Max\" (git config): " forename
+  read -p "Enter your surname e.g. \"Mustermann\" (git config): " surname
+  read -p "Enter the username of your VM user (non root user): " vm_user
   read -p "Enter the username of your GitLab account: " gitlab_user
   read -s -p "Enter your PAT generated in GitLab: " gitlab_token
   printf "\n"
@@ -22,7 +24,7 @@ prompt_user() {
 start_ansible() {
   ansible-playbook \
     -i "inventory" \
-    -e "vm_user=$vm_user gitlab_user=$gitlab_user gitlab_token=$gitlab_token" \
+    -e "vm_user=$vm_user gitlab_user=$gitlab_user gitlab_token=$gitlab_token forename=$forename surname=$surname" \
     playbook.yml -K
 }
 
