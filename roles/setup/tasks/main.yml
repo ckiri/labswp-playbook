@@ -1,0 +1,69 @@
+# install neccessary packages
+- name: Enusre neccessary packages are installed.
+  ansible.builtin.apt:
+    pkg:
+    - openjdk-11-jdk-headless
+    - graphviz
+    - npm
+    state: present
+
+# check if vscode-server is installed
+- name: Check if VS Code Server is installed.
+  stat:
+    path: "{{ ansible_env.HOME }}/.config/vscode-server/config.yaml"
+  register: vs_code_server_stat
+
+# install vscode-server if not already done
+- name: Ensure VS Code Server is installed.
+  ansible.builtin.shell: >
+    curl -fsSL https://code-server.dev/install.sh | sh
+  when: not vs_code_server_stat
+
+# check if nvm is installed
+- name: Check if NVM is installed.
+  stat:
+    path: "/home/{{ vm_user }}/.nvm/nvm.sh"
+  register: nvm_stat
+
+# install node version manager  if not already done
+- name: Ensure NVM is installed.
+  ansible.builtin.shell: >
+    curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.5/install.sh | bash
+  args:
+    creates: "/home/{{ vm_user }}/.nvm/nvm.sh"
+  when: not nvm_stat
+
+# clone gitlab repo
+- name: Ensure ProfitEngineers GitLab repository is cloned.
+  ansible.builtin.git:
+    repo: "https://{{ gitlab_user }}:{{ gitlab_token }}@git.it.hs-heilbronn.de/it/courses/seb/pmt/pmt-sose-23/profitengineers.git"
+    dest: "/home/{{ vm_user }}/profitengineers"
+    version: main
+    accept_hostkey: yes
+
+# Install typescript via npm
+- name: Ensure Typescript NPM package is installed.
+  community.general.npm:
+    name: typescript
+    global: yes
+
+# Install angular via npm
+- name: Ensure Angular CLI NPM package is installed.
+  community.general.npm:
+    name: '@angular/cli'
+    global: no
+    path: "/home/{{ vm_user }}/profitengineers"
+
+# Check if vscode-server systemd service is enabled
+- name: Check if VS Code Server SystemD service is enabled.
+  ansible.builtin.service:
+    name: "code-server@{{ vm_user }}.service"
+    state: started
+  register: code_server_service_stat
+
+# Enable vscode-server SystemD service
+- name: Ensure SystemD service for vscode-server is enabled and started.
+  ansible.builtin.shell: >
+    "systemctl enable --now code-server@{{ vm_user }}.service"
+  when: "code_server_service_stat.changed == true"
+
