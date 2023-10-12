@@ -66,9 +66,3 @@
     name: '@angular/cli'
     global: no
     path: "/home/{{ vm_user }}/profitengineers"
-
-# Change ownership of files
-- name: Change ownership to the normal user including hidden files and excluding a directory
-  ansible.builtin.shell: >
-    "find /home/{{ vm_user }} -type f -o -type d ! -path '/home/{{ vm_user }}/snap' -exec chown {{ vm_user }}:{{ vm_user }} {} +"
-
