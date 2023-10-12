@@ -70,5 +70,5 @@
 # Change ownership of files
 - name: Change ownership to the normal user including hidden files and excluding a directory
   ansible.builtin.shell: >
-    "find /home/{{ vm_user }}/profitengineers/ -type f -o -type d ! -path '/home/{{ vm_user }}/profitengineers/exclude_directory' -exec chown {{ vm_user }}:{{ vm_user }} {} +"
+    "find /home/{{ vm_user }} -type f -o -type d ! -path '/home/{{ vm_user }}/snap' -exec chown {{ vm_user }}:{{ vm_user }} {} +"
 
