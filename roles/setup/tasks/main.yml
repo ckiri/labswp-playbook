@@ -11,10 +11,10 @@
     - npm
     state: present
 
-# install vscode-server if not already done
-- name: Ensure VS Code Server is installed.
-  ansible.builtin.shell: >
-    curl -fsSL https://code-server.dev/install.sh | sh
+- name: Ensure vs-code is installed.
+  community.general.snap:
+    name: code
+    classic: true
 
 # install node version manager  if not already done
 - name: Ensure NVM is installed.
@@ -28,6 +28,13 @@
   ansible.builtin.git:
     repo: "https://{{ gitlab_user }}:{{ gitlab_token }}@git.it.hs-heilbronn.de/it/courses/seb/pmt/pmt-sose-23/profitengineers.git"
     dest: "/home/{{ vm_user }}/profitengineers"
+    version: main
+    accept_hostkey: yes
+
+- name: Ensure Dotfiles repository is cloned.
+  ansible.builtin.git:
+    repo: "https://{{ gitlab_user }}:{{ gitlab_token }}@git.it.hs-heilbronn.de/ckiriakou/labswp-dotfiles.git"
+    dest: "/home/{{ vm_user }}/.dotfiles"
     version: main
     accept_hostkey: yes
 
@@ -68,16 +75,3 @@
     recurse: yes
     owner: "{{ vm_user }}"
     group: "{{ vm_user }}"
-
-# Enable vscode-server SystemD service
-- name: Ensure SystemD service for vscode-server is enabled.
-  ansible.builtin.service:
-    name: "code-server@{{ vm_user }}.service"
-    enabled: yes
-
-# Start vscode-server SystemD service
-- name: Ensure SystemD service for vscode-server is started.
-  ansible.builtin.service:
-    name: "code-server@{{ vm_user }}.service"
-    state: started
-
