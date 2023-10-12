@@ -68,10 +68,7 @@
     path: "/home/{{ vm_user }}/profitengineers"
 
 # Change ownership of files
-- name: Recursively change ownership of files.
-  ansible.builtin.file:
-    path: "/home/{{ vm_user }}"
-    state: directory
-    recurse: yes
-    owner: "{{ vm_user }}"
-    group: "{{ vm_user }}"
+- name: Change ownership to the normal user including hidden files and excluding a directory
+  ansible.builtin.shell: >
+    "find /home/{{ vm_user }}/profitengineers/ -type f -o -type d ! -path '/home/{{ vm_user }}/profitengineers/exclude_directory' -exec chown {{ vm_user }}:{{ vm_user }} {} +"
+
