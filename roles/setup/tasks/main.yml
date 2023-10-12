@@ -2,6 +2,10 @@
 - name: Ensure neccessary packages are installed.
   ansible.builtin.apt:
     pkg:
+    - fzf
+    - zsh
+    - zsh-syntax-highlighting
+    - stow
     - openjdk-11-jdk-headless
     - graphviz
     - npm
