@@ -1,6 +1,7 @@
 ---
 - name: LabSW Development Enviroment - ProfitEngineers
-  hosts: labswp
+  hosts: localhost
+  connection: local
   become: true
 
   roles:

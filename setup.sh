@@ -23,7 +23,6 @@ prompt_user() {
 #######################################
 start_ansible() {
   ansible-playbook \
-    -i "inventory" \
     -e "vm_user=$vm_user gitlab_user=$gitlab_user gitlab_token=$gitlab_token forename=$forename surname=$surname" \
     playbook.yml -K
 }
